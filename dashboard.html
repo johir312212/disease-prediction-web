@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Clinical Support System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h2>🏥 Clinical Support System</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li id="navUserName" style="color:#64748b;font-weight:600;"></li>
+                <li><a href="#" id="logoutBtn" class="logout-btn">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="dashboard-container">
+
+            <!-- ============================================================
+                 ADMIN DASHBOARD
+            ============================================================ -->
+            <div id="adminDashboard" style="display:none;">
+                <div class="dashboard-header">
+                    <h1>Admin Dashboard</h1>
+                    <p class="user-role">Logged in as: <span id="adminUserName">Admin</span> &nbsp;|&nbsp; <span
+                            class="status-verified">● System Online</span></p>
+                </div>
+
+                <!-- Stat Cards -->
+                <div class="admin-stats">
+                    <div class="stat-card" style="border-left:4px solid #2563eb;">
+                        <h4>Total Doctors</h4>
+                        <span id="totalDoctors">0</span>
+                    </div>
+                    <div class="stat-card" style="border-left:4px solid #f59e0b;">
+                        <h4>Pending Verifications</h4>
+                        <span id="pendingVerifications">0</span>
+                    </div>
+                    <div class="stat-card" style="border-left:4px solid #10b981;">
+                        <h4>Total Patients</h4>
+                        <span id="totalPatients">0</span>
+                    </div>
+                    <div class="stat-card" style="border-left:4px solid #8b5cf6;">
+                        <h4>Total Visits</h4>
+                        <span id="totalVisits">0</span>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-grid">
+                    <div class="dashboard-section chart-section">
+                        <h3>📊 Doctor Activity (Visits per Doctor)</h3>
+                        <canvas id="doctorActivityChart" height="200"></canvas>
+                    </div>
+                    <div class="dashboard-section chart-section">
+                        <h3>🦠 Top Reported Symptoms</h3>
+                        <canvas id="symptomsChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pending Registrations -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>⏳ Pending Doctor Registrations</h3>
+                        <button onclick="loadPendingDoctors()" class="btn btn-secondary btn-small">Refresh</button>
+                    </div>
+                    <div id="pendingDoctorsList" class="data-table">
+                        <p class="empty-state">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- Doctor Management -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>👨‍⚕️ Doctor Management</h3>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button onclick="openAddDoctorModal()" class="btn btn-primary btn-small">+ Add
+                                Doctor</button>
+                            <button onclick="loadDoctorsList()" class="btn btn-secondary btn-small">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="doctorsList" class="data-table">
+                        <p class="empty-state">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- Patient Management -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>🧑‍🤝‍🧑 Patient Management</h3>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button onclick="openPatientModal()" class="btn btn-primary btn-small">+ Add
+                                Patient</button>
+                            <button onclick="loadPatientsList()" class="btn btn-secondary btn-small">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="adminPatientsList" class="data-table">
+                        <p class="empty-state">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================
+                 DOCTOR DASHBOARD
+            ============================================================ -->
+            <div id="doctorDashboard" style="display:none;">
+                <div class="dashboard-header">
+                    <h1>Doctor Dashboard</h1>
+                    <p class="user-role">Dr. <span id="doctorUserName">-</span> &nbsp;|&nbsp; <span
+                            class="status-verified">● Verified</span></p>
+                </div>
+
+
+
+                <!-- Quick Stats -->
+                <div class="admin-stats">
+                    <div class="stat-card" style="border-left:4px solid #10b981;">
+                        <h4>My Patients</h4>
+                        <span id="myPatientsCount">0</span>
+                    </div>
+                    <div class="stat-card" style="border-left:4px solid #2563eb;">
+                        <h4>Total Visits</h4>
+                        <span id="myVisitsCount">0</span>
+                    </div>
+                </div>
+
+                <!-- Patient List -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>🧑‍🤝‍🧑 My Patients</h3>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button onclick="openPatientModal()" class="btn btn-primary btn-small">+ Add
+                                Patient</button>
+                            <button onclick="loadPatientsList()" class="btn btn-secondary btn-small">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="doctorPatientsList" class="data-table">
+                        <p class="empty-state">Loading...</p>
+                    </div>
+                </div>
+
+                <!-- Recent Patient Visits -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h3>📋 Recent Visits</h3>
+                        <button onclick="loadRecentVisits()" class="btn btn-secondary btn-small">Refresh</button>
+                    </div>
+                    <div id="recentVisits" class="data-table">
+                        <p class="empty-state">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Verification Screen for unverified doctors -->
+            <div id="pendingScreen" style="display:none;">
+                <div class="dashboard-header">
+                    <h1>Registration Pending</h1>
+                </div>
+                <div class="dashboard-section">
+                    <div style="text-align:center;padding:2rem;">
+                        <div style="font-size:4rem;margin-bottom:1rem;">⏳</div>
+                        <h3>Your account is awaiting admin verification</h3>
+                        <p style="color:#64748b;margin-top:1rem;">An administrator will review your credentials and
+                            activate your account. You'll be able to login once verified.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.dashboard-container -->
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Clinical Support System. All rights reserved.</p>
+    </footer>
+
+    <!-- ============================================================
+         MODALS
+    ============================================================ -->
+
+    <!-- Patient Add/Edit Modal -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header">
+                <h3 id="patientModalTitle">Add New Patient</h3>
+                <span class="modal-close" onclick="closeModal('patientModal')">&times;</span>
+            </div>
+            <form id="patientForm" class="modal-form">
+                <input type="hidden" id="patientId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="patientName" required placeholder="Patient full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth *</label>
+                        <input type="date" id="patientDob" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender *</label>
+                        <select id="patientGender" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="patientPhone" placeholder="Contact number">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="patientEmail" placeholder="Patient email">
+                    </div>
+                    <div class="form-group">
+                        <label>Blood Group</label>
+                        <select id="patientBloodGroup">
+                            <option value="">Unknown</option>
+                            <option>A+</option>
+                            <option>A-</option>
+                            <option>B+</option>
+                            <option>B-</option>
+                            <option>AB+</option>
+                            <option>AB-</option>
+                            <option>O+</option>
+                            <option>O-</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea id="patientAddress" rows="2" placeholder="Patient address"></textarea>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Emergency Contact Name</label>
+                        <input type="text" id="emergencyContactName" placeholder="Emergency contact">
+                    </div>
+                    <div class="form-group">
+                        <label>Emergency Contact Phone</label>
+                        <input type="tel" id="emergencyContactPhone" placeholder="Emergency phone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Medical History</label>
+                    <textarea id="medicalHistory" rows="3"
+                        placeholder="Previous conditions, surgeries, hospitalizations..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Known Allergies</label>
+                    <textarea id="allergies" rows="2" placeholder="Drug allergies, food allergies..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Current Medications</label>
+                    <textarea id="currentMedications" rows="2"
+                        placeholder="Medications currently being taken..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('patientModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Patient</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Visit / Clinical Record Modal -->
+    <div id="visitModal" class="modal">
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header">
+                <h3 id="visitModalTitle">Record Patient Visit</h3>
+                <span class="modal-close" onclick="closeModal('visitModal')">&times;</span>
+            </div>
+            <form id="visitForm" class="modal-form">
+                <input type="hidden" id="visitPatientId">
+                <input type="hidden" id="visitId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Visit Date & Time *</label>
+                        <input type="datetime-local" id="visitDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Visit Type</label>
+                        <select id="visitType">
+                            <option value="consultation">Consultation</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="emergency">Emergency</option>
+                            <option value="routine">Routine Check-up</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Chief Complaint / Symptoms *</label>
+                    <textarea id="visitSymptoms" rows="3"
+                        placeholder="Describe patient's main complaint and symptoms..." required></textarea>
+                </div>
+
+                <!-- Demographic / Vitals -->
+                <h4 style="margin:0.5rem 0;color:#374151;font-size:0.95rem;">📊 Vitals & Demographic Data</h4>
+                <div class="form-grid-4">
+                    <div class="form-group">
+                        <label>Temperature (°C)</label>
+                        <input type="number" id="vitalTemp" step="0.1" placeholder="37.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Blood Pressure</label>
+                        <input type="text" id="vitalBP" placeholder="120/80">
+                    </div>
+                    <div class="form-group">
+                        <label>Heart Rate (bpm)</label>
+                        <input type="number" id="vitalHR" placeholder="72">
+                    </div>
+                    <div class="form-group">
+                        <label>SpO2 (%)</label>
+                        <input type="number" id="vitalSpO2" placeholder="98">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (kg)</label>
+                        <input type="number" id="vitalWeight" step="0.1" placeholder="70">
+                    </div>
+                    <div class="form-group">
+                        <label>Height (cm)</label>
+                        <input type="number" id="vitalHeight" placeholder="170">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🧪 Test Results / Lab Reports</label>
+                    <textarea id="testResults" rows="3"
+                        placeholder="CBC results, blood sugar, X-ray findings, ECG, etc..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>🩺 Diagnosis</label>
+                    <textarea id="visitDiagnosis" rows="2"
+                        placeholder="Clinical diagnosis and ICD code if available..."></textarea>
+                </div>
+
+                <!-- Disease Prediction Section (Cardiology ML) -->
+                <div id="heartPredictionSection" style="margin:1rem 0;padding:1.25rem;background:#f0f9ff;border-radius:4px;border:2px solid #0284c7;">
+                    <h4 style="margin:0 0 1rem 0;color:#0c4a6e;">❤️ Heart Disease Risk Prediction (ML Model)</h4>
+                    
+                    <div id="predictionCardiologyNotice" style="font-size:0.9rem;color:#0c4a6e;background:#e0f2fe;padding:0.75rem;border-radius:4px;margin-bottom:1rem;">
+                        ⓘ Only cardiology doctors can use this ML model. All fields are required for accurate prediction.
+                    </div>
+
+                    <!-- Prediction Form Grid -->
+                    <div id="predictionFormContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        
+                        <!-- Age -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Age (years)</label>
+                            <input type="number" id="predAge" placeholder="18-120" min="18" max="120" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+
+                        <!-- Sex -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Sex</label>
+                            <select id="predSex" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                        </div>
+
+                        <!-- Chest Pain Type -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Chest Pain Type (CP)</label>
+                            <select id="predCP" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="0">Typical Angina (0)</option>
+                                <option value="1">Atypical Angina (1)</option>
+                                <option value="2">Non-anginal Pain (2)</option>
+                                <option value="3">Asymptomatic (3)</option>
+                            </select>
+                        </div>
+
+                        <!-- Resting BP -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Resting BP (mmHg)</label>
+                            <input type="number" id="predTrestbps" placeholder="80-200" min="80" max="200" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+
+                        <!-- Cholesterol -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Cholesterol (mg/dL)</label>
+                            <input type="number" id="predChol" placeholder="100-400" min="100" max="400" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+
+                        <!-- Fasting Blood Sugar -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Fasting Blood Sugar > 120</label>
+                            <select id="predFbs" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="0">No (0)</option>
+                                <option value="1">Yes (1)</option>
+                            </select>
+                        </div>
+
+                        <!-- Resting ECG -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Resting ECG</label>
+                            <select id="predRestecg" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="0">Normal (0)</option>
+                                <option value="1">ST-T Abnormality (1)</option>
+                                <option value="2">LVH (2)</option>
+                            </select>
+                        </div>
+
+                        <!-- Max Heart Rate -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Max Heart Rate (bpm)</label>
+                            <input type="number" id="predThalach" placeholder="60-220" min="60" max="220" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+
+                        <!-- Exercise Induced Angina -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Exercise Induced Angina</label>
+                            <select id="predExang" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="0">No (0)</option>
+                                <option value="1">Yes (1)</option>
+                            </select>
+                        </div>
+
+                        <!-- ST Depression -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">ST Depression (oldpeak)</label>
+                            <input type="number" id="predOldpeak" placeholder="0-6.2" min="0" max="6.2" step="0.1" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+
+                        <!-- Slope -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Slope of ST Segment</label>
+                            <select id="predSlope" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="0">Upsloping (0)</option>
+                                <option value="1">Flat (1)</option>
+                                <option value="2">Downsloping (2)</option>
+                            </select>
+                        </div>
+
+                        <!-- Major Vessels -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Major Vessels (CA)</label>
+                            <select id="predCA" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="0">0 vessels</option>
+                                <option value="1">1 vessel</option>
+                                <option value="2">2 vessels</option>
+                                <option value="3">3 vessels</option>
+                            </select>
+                        </div>
+
+                        <!-- Thalassemia -->
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Thalassemia (THAL)</label>
+                            <select id="predThal" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="">-- Select --</option>
+                                <option value="1">Normal (1)</option>
+                                <option value="2">Fixed Defect (2)</option>
+                                <option value="3">Reversible Defect (3)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Notes Section -->
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #e2e8f0;">
+                        <h5 style="margin: 0 0 1rem 0; color: #374151; font-size: 0.95rem;">📋 Clinical Notes (Optional - Enhances AI Analysis)</h5>
+
+                        <div class="form-group" style="margin: 0 0 1rem 0;">
+                            <label style="font-size: 0.9rem; color: #6b7280;">Symptoms & Complaints</label>
+                            <textarea id="predSymptoms" rows="2" placeholder="Describe patient's symptoms, pain, discomfort, or other complaints..." style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; resize: vertical;"></textarea>
+                        </div>
+
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem; color: #6b7280;">Test Reports & Medical History</label>
+                            <textarea id="predTestReports" rows="2" placeholder="Recent test results, medical history, medications, allergies..." style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; resize: vertical;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button type="button" class="btn btn-primary" onclick="predictDiseaseForVisit()" style="flex: 1;">
+                            🔮 Run ML Prediction
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearPredictionForm()" style="flex: 1;">
+                            Clear Form
+                        </button>
+                    </div>
+
+                    <div id="predictionResult" style="display:none; margin-top: 1rem;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Treatment Plan & Notes</label>
+                    <textarea id="visitNotes" rows="3"
+                        placeholder="Treatment plan, referrals, instructions to patient..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('visitModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Visit Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Patient History / View Modal -->
+    <div id="visitDetailsModal" class="modal">
+        <div class="modal-content" style="max-width:750px;">
+            <div class="modal-header">
+                <h3>Patient History</h3>
+                <span class="modal-close" onclick="closeModal('visitDetailsModal')">&times;</span>
+            </div>
+            <div id="visitDetailsContent" style="padding:1.5rem; max-height:65vh; overflow-y:auto;">
+            </div>
+            <div class="modal-actions" style="padding:1rem 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('visitDetailsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Details Modal (Admin) -->
+    <div id="doctorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Doctor Details</h3>
+                <span class="modal-close" onclick="closeModal('doctorModal')">&times;</span>
+            </div>
+            <div id="doctorModalContent" style="padding:1.5rem;"></div>
+            <div class="modal-actions" style="padding:1rem 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('doctorModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Doctor Modal (Admin creates doctor account) -->
+    <div id="addDoctorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Doctor</h3>
+                <span class="modal-close" onclick="closeModal('addDoctorModal')">&times;</span>
+            </div>
+            <form id="addDoctorForm" class="modal-form">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="newDoctorName" required placeholder="Doctor full name">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="newDoctorEmail" required placeholder="doctor@hospital.com">
+                </div>
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <input type="text" id="newDoctorSpec" placeholder="e.g., Cardiology">
+                </div>
+                <div class="form-group">
+                    <label>Doctor ID</label>
+                    <input type="text" id="newDoctorId" placeholder="Government issued ID">
+                </div>
+                <div class="form-group">
+                    <label>Temporary Password *</label>
+                    <input type="password" id="newDoctorPassword" required placeholder="Set initial password"
+                        minlength="8">
+                </div>
+                <p style="font-size:0.8rem;color:#64748b;">The doctor will be marked as <strong>verified</strong>
+                    immediately since an admin is adding them.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('addDoctorModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create & Verify Doctor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Prescription Modal -->
+    <div id="prescriptionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Prescription</h3>
+                <span class="modal-close" onclick="closeModal('prescriptionModal')">&times;</span>
+            </div>
+            <form id="prescriptionForm" class="modal-form">
+                <input type="hidden" id="prescriptionPatientId">
+                <div id="medicationsList">
+                    <div class="medication-item">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Medication</label><input type="text" class="medication-name"
+                                    placeholder="Drug name" required></div>
+                            <div class="form-group"><label>Dosage</label><input type="text" class="medication-dosage"
+                                    placeholder="e.g. 500mg" required></div>
+                            <div class="form-group"><label>Frequency</label><input type="text"
+                                    class="medication-frequency" placeholder="e.g. 3x daily" required></div>
+                            <div class="form-group"><label>Duration</label><input type="text"
+                                    class="medication-duration" placeholder="e.g. 7 days" required></div>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-small remove-medication">Remove</button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-small" id="addMedication">+ Add Medication</button>
+                <div class="form-group">
+                    <label>Special Instructions</label>
+                    <textarea id="prescriptionInstructions" rows="2"
+                        placeholder="Instructions for the patient..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Precautions/Warnings</label>
+                    <textarea id="prescriptionPrecautions" rows="2"
+                        placeholder="Any precautions or warnings (e.g., avoid alcohol, monitor for side effects)..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeModal('prescriptionModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Prescription</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Generate Medical Report</h3>
+                <span class="modal-close" onclick="closeModal('reportModal')">&times;</span>
+            </div>
+            <form id="reportForm" class="modal-form">
+                <input type="hidden" id="reportPatientId">
+                <div class="form-group">
+                    <label>Report Type *</label>
+                    <select id="reportType" required>
+                        <option value="consultation">Consultation Report</option>
+                        <option value="lab">Lab Results Summary</option>
+                        <option value="imaging">Imaging Report</option>
+                        <option value="medical_certificate">Medical Certificate</option>
+                        <option value="referral">Referral Letter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Report Title *</label>
+                    <input type="text" id="reportTitle" required placeholder="e.g. Initial Consultation Summary">
+                </div>
+                <div class="form-group">
+                    <label>Report Content *</label>
+                    <textarea id="reportContent" rows="6" required placeholder="Enter full details here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Recommendations & Treatment Plan</label>
+                    <textarea id="reportRecommendations" rows="3" placeholder="Clinical recommendations and treatment plan..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Follow-up Instructions</label>
+                    <textarea id="reportFollowUp" rows="2" placeholder="Follow-up care instructions..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('reportModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate & Save Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="dashboard.js"></script>
+</body>
+
+</html>
