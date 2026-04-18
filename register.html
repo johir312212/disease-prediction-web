@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Clinical Support System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h2>Clinical Support System</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html" class="active">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Register as a healthcare professional</p>
+
+                <form id="registerForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+
+                    <!-- Hidden role field - always doctor -->
+                    <input type="hidden" id="role" name="role" value="doctor">
+
+                    <!-- Doctor-specific fields -->
+                    <div id="doctorFields" class="role-fields">
+                        <p style="font-size:0.875rem; color:#64748b; margin-bottom:1rem;">
+                            ⚠️ Doctor registrations require admin verification before login access is granted.
+                        </p>
+                        <div class="form-group">
+                            <label for="specialization">Specialization</label>
+                            <input type="text" id="specialization" name="specialization"
+                                placeholder="e.g., Cardiology, Pediatrics">
+                        </div>
+                        <div class="form-group">
+                            <label for="doctorId">Government-issued Doctor ID *</label>
+                            <input type="text" id="doctorId" name="doctorId"
+                                placeholder="Enter your official doctor ID number">
+                        </div>
+                        <div class="form-group">
+                            <label for="doctorLicense">Doctor License / Credential Photo *</label>
+                            <input type="file" id="doctorLicense" name="doctorLicense" accept="image/*,application/pdf">
+                            <small>Upload a clear photo or scan of your license</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required
+                            placeholder="At least 8 characters" minlength="8">
+                        <small>Must contain uppercase, lowercase, number and special character</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required
+                            placeholder="Confirm your password">
+                    </div>
+
+                    <div id="errorMessage" class="error-message"></div>
+                    <div id="successMessage" class="success-message"></div>
+
+                    <button type="submit" class="btn btn-primary btn-full" id="registerBtn">
+                        Register
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="login.html">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Clinical Support System. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="auth.js"></script>
+</body>
+
+</html>
